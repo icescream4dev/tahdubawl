@@ -6,16 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # ── Build Nuitka (.exe standalone) ──────────────
+  nuitka:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Installer dépendances (offline)
+      - name: Dépendances (offline)
         run: pip install --no-index --find-links=build/wheels openpyxl PyYAML ordered-set zstandard et-xmlfile
-      - name: Installer Nuitka
+      - name: Nuitka
         run: pip install build/wheels/nuitka-4.1.3.tar.gz
       - name: Compiler
         run: |
@@ -26,14 +27,58 @@ jobs:
             --output-dir=build `
             --assume-yes-for-downloads `
             tahdubawl.py
-      - name: Créer le dossier portable
+      - name: Dossier portable
         run: |
-          New-Item -ItemType Directory -Force -Path tahdubawl-portable
-          xcopy /E build\tahdubawl.dist\* tahdubawl-portable\
-          copy config.yaml tahdubawl-portable\
-          copy LISEZ-MOI.txt tahdubawl-portable\
-      - name: Upload
-        uses: actions/upload-artifact@v4
+          New-Item -ItemType Directory -Force -Path portable
+          xcopy /E build\tahdubawl.dist\* portable\
+          copy config.yaml portable\
+          copy LISEZ-MOI.txt portable\
+      - uses: actions/upload-artifact@v4
         with:
-          name: tahdubawl-windows
-          path: tahdubawl-portable/
+          name: tahdubawl-nuitka
+          path: portable/
+
+  # ── Build Python embeddable (fallback AV-safe) ──
+  embeddable:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger Python embeddable
+        run: |
+          curl -L -o python-embed.zip https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip
+          New-Item -ItemType Directory -Force -Path portable/python
+          Expand-Archive -Path python-embed.zip -DestinationPath portable/python
+      - name: Activer pip dans l'embeddable
+        run: |
+          $pth = Get-Content portable/python/python311._pth
+          $pth = $pth -replace '#import site', 'import site'
+          $pth += ''; $pth += '..\'; $pth += '..\deps'
+          $pth | Set-Content portable/python/python311._pth
+      - name: Installer pip
+        run: |
+          curl -L -o get-pip.py https://bootstrap.pypa.io/get-pip.py
+          portable/python/python.exe get-pip.py --no-warn-script-location
+      - name: Installer dépendances dans l'embeddable
+        run: |
+          portable/python/python.exe -m pip install --no-index --find-links=build/wheels openpyxl PyYAML --target portable/deps
+      - name: Copier les sources et la config
+        run: |
+          copy tahdubawl.py portable\
+          copy config_loader.py portable\
+          copy excel_reader.py portable\
+          copy rules_engine.py portable\
+          copy draw.py portable\
+          copy output_writer.py portable\
+          copy config.yaml portable\
+          copy LISEZ-MOI.txt portable\
+      - name: Créer lancer.bat
+        run: |
+          @"
+          @echo off
+          python\python.exe tahdubawl.py
+          pause
+          "@ | Out-File -FilePath portable\lancer.bat -Encoding ASCII
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tahdubawl-embeddable
+          path: portable/
