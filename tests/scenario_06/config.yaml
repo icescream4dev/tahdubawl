@@ -1,0 +1,27 @@
+input:
+  file: data.xlsx
+  sheet: 0
+email_column: D
+winners: 500
+batch_size: 100
+rules:
+  - column: G
+    op: "="
+    value: "Actif"
+    percent: 80
+  - column: F
+    op: "="
+    value: "X"
+    percent: 30
+  - column: E
+    op: "="
+    value: "A"
+    percent: 20
+  - column: F
+    op: "="
+    value: "Y"
+    percent: 40
+  - column: C
+    op: ">"
+    value: 50
+    percent: 50

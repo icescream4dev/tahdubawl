@@ -3,8 +3,10 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
-# Build
-build/
+# Build (source scripts OK, compiled output ignored)
+build/tahdubawl.build/
+build/tahdubawl.dist/
+build/tahdubawl.onefile-build/
 tahdubawl-portable/_*.so
 tahdubawl-portable/*.so*
 tahdubawl-portable/tahdubawl.bin
