@@ -61,7 +61,7 @@ rules:
     value: 180
     percent: 30
 """)
-    print(f"✅ scenario_01 : 5000 lignes, équilibré")
+    print(f"[OK] scenario_01 : 5000 lignes, équilibré")
 
 
 # ── Scénario 02 : Repêchage ──────────────────────
@@ -95,7 +95,7 @@ def gen_02():
 
     # Mêmes règles que 01
     shutil.copy(BASE / "scenario_01" / "config.yaml", d / "config.yaml")
-    print(f"✅ scenario_02 : 5000 lignes, 2% PACA → repêchage")
+    print(f"[OK] scenario_02 : 5000 lignes, 2% PACA → repêchage")
 
 
 # ── Scénario 03 : Plus de gagnants que de lignes ──
@@ -126,7 +126,7 @@ rules:
     value: "NEXISTE_PAS"
     percent: 50
 """)
-    print(f"✅ scenario_03 : 100 lignes, 500 gagnants → toutes les lignes")
+    print(f"[OK] scenario_03 : 100 lignes, 500 gagnants → toutes les lignes")
 
 
 # ── Scénario 04 : Sans règles ────────────────────
@@ -153,7 +153,7 @@ winners: 50
 batch_size: 25
 rules: []
 """)
-    print(f"✅ scenario_04 : 10 000 lignes, 0 règle")
+    print(f"[OK] scenario_04 : 10 000 lignes, 0 règle")
 
 
 # ── Scénario 05 : Opérateurs numériques ──────────
@@ -191,7 +191,7 @@ rules:
     value: 50
     percent: 40
 """)
-    print(f"✅ scenario_05 : 5000 lignes, âges 18-80, opérateurs < >")
+    print(f"[OK] scenario_05 : 5000 lignes, âges 18-80, opérateurs < >")
 
 
 # ── Scénario 06 : Stress (5 règles, 20k lignes) ──
@@ -254,7 +254,7 @@ rules:
     value: 50
     percent: 50
 """)
-    print(f"✅ scenario_06 : 20 000 lignes, 5 règles emboîtées")
+    print(f"[OK] scenario_06 : 20 000 lignes, 5 règles emboîtées")
 
 
 # ── Main ─────────────────────────────────────────
@@ -266,4 +266,4 @@ if __name__ == "__main__":
     gen_04()
     gen_05()
     gen_06()
-    print(f"\n🎲 {6} scénarios générés dans {BASE}/")
+    print(f"\n{6} scénarios générés dans {BASE}/")
