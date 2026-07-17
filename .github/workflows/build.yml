@@ -1,0 +1,39 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Installer dépendances (offline)
+        run: pip install --no-index --find-links=build/wheels openpyxl PyYAML ordered-set zstandard et-xmlfile
+      - name: Installer Nuitka
+        run: pip install build/wheels/nuitka-4.1.3.tar.gz
+      - name: Compiler
+        run: |
+          python -m nuitka `
+            --standalone `
+            --include-package=openpyxl `
+            --include-package=yaml `
+            --output-dir=build `
+            --assume-yes-for-downloads `
+            tahdubawl.py
+      - name: Créer le dossier portable
+        run: |
+          mkdir tahdubawl-portable
+          xcopy /E build\tahdubawl.dist\* tahdubawl-portable\
+          copy config.yaml tahdubawl-portable\
+          copy LISEZ-MOI.txt tahdubawl-portable\
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: tahdubawl-windows
+          path: tahdubawl-portable/
