@@ -33,6 +33,12 @@ jobs:
           xcopy /E build\tahdubawl.dist\* portable\
           copy config.yaml portable\
           copy LISEZ-MOI.txt portable\
+      - name: Générer les scénarios de test
+        run: |
+          python tests/generate.py
+          New-Item -ItemType Directory -Force -Path portable\tests
+          xcopy /E tests\scenario_*\* portable\tests\
+          copy tests\run_all.bat portable\tests\
       - uses: actions/upload-artifact@v4
         with:
           name: tahdubawl-nuitka
@@ -78,6 +84,12 @@ jobs:
           python\python.exe tahdubawl.py
           pause
           "@ | Out-File -FilePath portable\lancer.bat -Encoding ASCII
+      - name: Générer les scénarios de test
+        run: |
+          portable/python/python.exe tests/generate.py
+          New-Item -ItemType Directory -Force -Path portable\tests
+          xcopy /E tests\scenario_*\* portable\tests\
+          copy tests\run_all.bat portable\tests\
       - uses: actions/upload-artifact@v4
         with:
           name: tahdubawl-embeddable
