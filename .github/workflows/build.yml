@@ -28,7 +28,7 @@ jobs:
             tahdubawl.py
       - name: Créer le dossier portable
         run: |
-          mkdir tahdubawl-portable
+          New-Item -ItemType Directory -Force -Path tahdubawl-portable
           xcopy /E build\tahdubawl.dist\* tahdubawl-portable\
           copy config.yaml tahdubawl-portable\
           copy LISEZ-MOI.txt tahdubawl-portable\
