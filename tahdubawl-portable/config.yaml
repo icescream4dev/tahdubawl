@@ -1,0 +1,19 @@
+input:
+  file: data.xlsx        # Chemin du fichier Excel
+  sheet: 0
+email_column: D
+winners: 100
+batch_size: 50
+rules:
+  - column: F
+    op: "="
+    value: "Femme"
+    percent: 50
+  - column: T
+    op: "="
+    value: "PACA"
+    percent: 20
+  - column: C
+    op: ">"
+    value: 180
+    percent: 30

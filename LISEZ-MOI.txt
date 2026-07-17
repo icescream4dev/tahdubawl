@@ -1,0 +1,81 @@
+=== TAHDUBAWL — Tirage au sort sur Excel ===
+=============================================
+
+PRINCIPE
+--------
+1. Placez votre fichier Excel dans ce dossier
+2. Ouvrez config.yaml avec le Bloc-notes
+3. Modifiez les paramètres (fichier, colonne email, nombre de gagnants, règles)
+4. Double-cliquez sur tahdubawl.exe
+5. Ouvrez resultats/resultat.txt → copiez un paquet → collez dans Outlook
+
+CONFIG.YAML
+-----------
+Les colonnes sont référencées par leur LETTRE (A, B, C...).
+
+Exemple :
+
+  input:
+    file: data.xlsx
+    sheet: 0
+
+  email_column: D        # Colonne contenant les adresses email
+
+  winners: 100           # Nombre de gagnants
+  batch_size: 50         # Emails par paquet (pour Outlook)
+
+  rules:                 # Règles de quotas (optionnel)
+    - column: F
+      op: "="
+      value: "Femme"
+      percent: 50
+
+Opérateurs disponibles : =, >, <, >=, <=, !=
+Les virgules sont acceptées pour les nombres (3,14 = 3.14).
+
+RÈGLES EMBOÎTÉES
+----------------
+Les règles sont EMBOÎTÉES. La DERNIÈRE règle est la plus EXTERNE.
+Elle partitionne tout le monde, puis l'avant-dernière partitionne
+chaque groupe, etc.
+
+Exemple avec 3 règles :
+  1. F = Femme → 50%    (interne)
+  2. T = PACA  → 20%    (intermédiaire)
+  3. C > 180   → 30%    (externe)
+
+→ 30% mesurent >180cm, dont 20% habitent PACA, dont 50% sont des femmes
+→ 70% mesurent ≤180cm, dont 20% PACA, dont 50% femmes
+
+Si une règle est impossible (pas assez de candidats), elle est
+automatiquement réduite. Un avertissement est écrit dans le résultat.
+Le nombre de gagnants est TOUJOURS respecté (sauf si le fichier
+contient moins de personnes que demandé).
+
+SORTIE
+------
+Un seul fichier : resultats/resultat.txt
+
+  === TAHDUBAWL — RÉSULTATS ===
+  Date    : ...
+  Dataset : data.xlsx (58 432 lignes)
+  Gagnants demandés : 100 — Tirés : 100
+
+  ⚠️  Règles adaptées :          ← si une règle a été réduite
+    ...
+
+  === Paquet 1 ===
+  toto@mail.com
+  tata@mail.com
+  ...
+
+  === Paquet 2 ===
+  ...
+
+  === FIN ===
+
+Copiez le contenu d'un paquet et collez-le dans le champ "À:" d'Outlook.
+
+PAS DE CONNEXION INTERNET
+-------------------------
+Tahdubawl fonctionne 100% hors ligne. Aucune donnée n'est envoyée.
