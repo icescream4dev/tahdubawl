@@ -2,51 +2,62 @@
 
 ## Prérequis
 
-- **Python 3.11+** installé (https://python.org)
+- **Python 3.11+** (https://python.org/downloads/)
 - **Visual Studio Build Tools** ou **MinGW-w64** (compilateur C)
-- Dépendances Python :
+  - VS Build Tools : https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+  - Cochez "Desktop development with C++"
 
-```bash
-pip install -r requirements.txt
-```
+## Build offline (recommandé)
 
-## Build
+Toutes les dépendances sont dans `wheels/`. Aucune connexion réseau nécessaire.
 
 ```batch
 build.bat
 ```
 
-→ Produit `build\tahdubawl.dist\` avec `tahdubawl.exe` et toutes les dépendances.
+→ Le script installe les dépendances depuis `wheels/`, puis Nuitka, puis compile.
 
-## Dossier portable
-
-```batch
-mkdir tahdubawl-portable
-xcopy /E build\tahdubawl.dist\* tahdubawl-portable\
-copy config.yaml tahdubawl-portable\
-copy ..\LISEZ-MOI.txt tahdubawl-portable\
-```
-
-Ou utiliser le script `build.bat` qui propose de le faire automatiquement.
-
-## Alternative : Python embeddable (fallback AV)
-
-Si Nuitka est bloqué par l'antivirus, utiliser Python embeddable :
-
-1. Télécharger https://www.python.org/downloads/windows/ → "Windows embeddable package (64-bit)"
-2. Extraire dans `tahdubawl-portable/`
-3. Installer les dépendances dans le dossier embeddable :
+## Build online (si réseau dispo)
 
 ```batch
-python-embed\python.exe -m pip install openpyxl PyYAML --target python-embed\Lib
+pip install -r requirements.txt
+python -m nuitka --standalone --include-package=openpyxl --include-package=yaml --output-dir=..\build --assume-yes-for-downloads ..\tahdubawl.py
 ```
 
-4. Créer `tahdubawl-portable\lancer.bat` :
+## Résultat
+
+`..\build\tahdubawl.dist\` contient `tahdubawl.exe` et toutes les dépendances compilées.
+
+## Dossier portable livrable
+
+```batch
+mkdir ..\tahdubawl-portable
+xcopy /E ..\build\tahdubawl.dist\* ..\tahdubawl-portable\
+copy ..\config.yaml ..\tahdubawl-portable\
+copy LISEZ-MOI.txt ..\tahdubawl-portable\
+```
+
+Ou copier manuellement :
+- `tahdubawl.exe` (et tous les `.dll`/`.pyd` du dossier `dist`)
+- `config.yaml` (depuis la racine du projet)
+- `LISEZ-MOI.txt`
+
+## Alternative : Python embeddable (fallback si Nuitka bloqué par l'AV)
+
+1. Télécharger Python embeddable : https://www.python.org/downloads/windows/ → "Windows embeddable package (64-bit)"
+2. Extraire dans `tahdubawl-portable/python-embed/`
+3. Modifier `python-embed/python312._pth` (ou similaire) pour ajouter `Lib` et `..\` au path
+4. Installer les dépendances :
+
+```batch
+python-embed\python.exe -m pip install --no-index --find-links=..\build\wheels openpyxl PyYAML
+```
+
+5. Copier les sources Python (`*.py` de la racine) dans le dossier portable
+6. Créer `lancer.bat` :
 
 ```batch
 @echo off
 python-embed\python.exe tahdubawl.py
 pause
 ```
-
-5. Copier les sources Python (`tahdubawl.py`, `config_loader.py`, etc.) dans le dossier.
