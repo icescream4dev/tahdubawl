@@ -39,7 +39,7 @@ jobs:
         run: |
           python tests/generate.py
           New-Item -ItemType Directory -Force -Path portable\tests
-          xcopy /E tests\scenario_*\* portable\tests\
+          Copy-Item -Path tests\scenario_*\* -Destination portable\tests\ -Recurse
           copy tests\run_all.bat portable\tests\
       - uses: actions/upload-artifact@v4
         with:
@@ -92,7 +92,7 @@ jobs:
         run: |
           portable/python/python.exe tests/generate.py
           New-Item -ItemType Directory -Force -Path portable\tests
-          xcopy /E tests\scenario_*\* portable\tests\
+          Copy-Item -Path tests\scenario_*\* -Destination portable\tests\ -Recurse
           copy tests\run_all.bat portable\tests\
       - uses: actions/upload-artifact@v4
         with:
