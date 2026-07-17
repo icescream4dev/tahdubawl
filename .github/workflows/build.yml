@@ -34,6 +34,8 @@ jobs:
           copy config.yaml portable\
           copy LISEZ-MOI.txt portable\
       - name: Générer les scénarios de test
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           python tests/generate.py
           New-Item -ItemType Directory -Force -Path portable\tests
@@ -85,6 +87,8 @@ jobs:
           pause
           "@ | Out-File -FilePath portable\lancer.bat -Encoding ASCII
       - name: Générer les scénarios de test
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           portable/python/python.exe tests/generate.py
           New-Item -ItemType Directory -Force -Path portable\tests
