@@ -6,31 +6,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── Build Nuitka (.exe standalone) ──────────────
-  nuitka:
+  # ── Build PyInstaller --onedir ───────────────────
+  pyinstaller:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Dépendances (offline)
-        run: pip install --no-index --find-links=build/wheels openpyxl PyYAML ordered-set zstandard et-xmlfile
-      - name: Nuitka
-        run: pip install build/wheels/nuitka-4.1.3.tar.gz
-      - name: Compiler
-        run: |
-          python -m nuitka `
-            --standalone `
-            --include-package=openpyxl `
-            --include-package=yaml `
-            --output-dir=build `
-            --assume-yes-for-downloads `
-            tahdubawl.py
+      - name: Dépendances
+        run: pip install --no-index --find-links=build/wheels openpyxl PyYAML
+      - name: PyInstaller
+        run: pip install pyinstaller
+      - name: Compiler (--onedir)
+        run: pyinstaller --onedir --name tahdubawl tahdubawl.py
       - name: Dossier portable
         run: |
           New-Item -ItemType Directory -Force -Path portable
-          xcopy /E build\tahdubawl.dist\* portable\
+          xcopy /E dist\tahdubawl\* portable\
           copy config.yaml portable\
           copy LISEZ-MOI.txt portable\
       - name: Générer les scénarios de test
@@ -43,7 +36,7 @@ jobs:
           copy tests\run_all.bat portable\tests\
       - uses: actions/upload-artifact@v4
         with:
-          name: tahdubawl-nuitka
+          name: tahdubawl-pyinstaller
           path: portable/
 
   # ── Build Python embeddable (fallback AV-safe) ──
