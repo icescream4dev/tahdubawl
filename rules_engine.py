@@ -10,6 +10,7 @@ class AdaptedRule:
     requested_pct: float; applied_pct: float
     requested_n: int; applied_n: int
     reason: str
+    path: str = ""           # contexte d'imbrication, ex: "C > 180 (OUI) → T = PACA (NON)"
 
 
 # ── Évaluation d'une condition ────────────────────
@@ -42,7 +43,7 @@ class Node:
     picked: list = field(default_factory=list)
 
 
-def _build(pool, rules, target, offset, total, adapted):
+def _build(pool, rules, target, offset, total, adapted, rule_path=""):
     """Phase 1 : construit l'arbre de partitionnement."""
     n = min(target, len(pool))
     node = Node(pool=pool, target=n)
@@ -63,6 +64,11 @@ def _build(pool, rules, target, offset, total, adapted):
     n_match = min(requested, len(match), n)
     n_rest  = n - n_match
 
+    # Construire le chemin pour ce niveau
+    label = f"{rule.column} {rule.op} {rule.value}"
+    match_path = f"{rule_path} → {label} (OUI)" if rule_path else f"{label} (OUI)"
+    rest_path  = f"{rule_path} → {label} (NON)" if rule_path else f"{label} (NON)"
+
     if n_match < requested:
         adapted.append(AdaptedRule(
             rule_index=idx, column=rule.column,
@@ -71,11 +77,12 @@ def _build(pool, rules, target, offset, total, adapted):
             applied_pct=round(n_match / target * 100, 1) if target else 0,
             requested_n=requested, applied_n=n_match,
             reason=f"Seulement {len(match)} candidats (cible: {requested})",
+            path=match_path,
         ))
 
     node.children = [
-        _build(match, inner, n_match, offset, total, adapted),
-        _build(rest,  inner, n_rest,  offset, total, adapted),
+        _build(match, inner, n_match, offset, total, adapted, match_path),
+        _build(rest,  inner, n_rest,  offset, total, adapted, rest_path),
     ]
     return node
 

@@ -20,6 +20,7 @@ def write(emails, batch_size, output, adapted, total_rows, winners, col_map, exc
             for a in adapted:
                 label = col_map.get(a.column, f"Colonne {a.column}")
                 f.write(f"  - {label} ({a.column}) {a.op} {a.value}\n")
+                f.write(f"    Contexte : {a.path}\n")
                 f.write(f"    Demandé : {a.requested_pct}% ({a.requested_n} pers.)\n")
                 f.write(f"    Appliqué : {a.applied_pct}% ({a.applied_n} pers.)\n")
                 f.write(f"    Raison : {a.reason}\n\n")
@@ -29,8 +30,7 @@ def write(emails, batch_size, output, adapted, total_rows, winners, col_map, exc
         for i in range(0, len(emails), batch_size):
             batch = emails[i:i + batch_size]
             f.write(f"=== Paquet {(i // batch_size) + 1} ===\n")
-            for email in batch:
-                f.write(f"{email}\n")
+            f.write("; ".join(batch) + "\n")
             f.write("\n")
 
         f.write(f"=== FIN ===\n")
